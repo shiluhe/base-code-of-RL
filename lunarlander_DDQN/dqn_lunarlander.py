@@ -19,7 +19,7 @@ class QNetwork(nn.Module):
         self.fc1 = nn.Linear(state_size, hidden_size)
         self.fc2 = nn.Linear(hidden_size, hidden_size)
         self.fc3 = nn.Linear(hidden_size, action_size)
-        
+
     def forward(self, x):
         x = torch.relu(self.fc1(x))
         x = torch.relu(self.fc2(x))
@@ -30,7 +30,7 @@ class QNetwork(nn.Module):
 # ----------------------------
 class DQNAgent:
     def __init__(self, state_size, action_size, lr=5e-4):
-        self.device = torch.device("cpu")  # 强制使用 CPU
+        self.device = torch.device("cpu")
         
         self.state_size = state_size
         self.action_size = action_size
@@ -65,7 +65,7 @@ class DQNAgent:
             return
         
         batch = random.sample(self.memory, self.batch_size)
-        
+
         # 转为 numpy array 再转 tensor
         states = np.array([e[0] for e in batch], dtype=np.float32)
         actions = np.array([e[1] for e in batch])
@@ -84,9 +84,9 @@ class DQNAgent:
             next_actions = self.q_network(next_states).argmax(1)
             next_q_values = self.target_network(next_states).gather(1, next_actions.unsqueeze(1)).squeeze()
         target_q_values = rewards + (self.gamma * next_q_values * (~dones))
-        
+
         current_q_values = self.q_network(states).gather(1, actions.unsqueeze(1)).squeeze()
-        
+
         loss = nn.MSELoss()(current_q_values, target_q_values)
         self.optimizer.zero_grad()
         loss.backward()
@@ -95,7 +95,7 @@ class DQNAgent:
         self.step_count += 1
         if self.step_count % self.update_target_every == 0:
             self.target_network.load_state_dict(self.q_network.state_dict())
-        
+
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
 
@@ -135,7 +135,7 @@ def main():
         if (e + 1) % 100 == 0:
             avg_score = np.mean(scores[-100:])
             print(f"  -> Avg last 100: {avg_score:.2f}")
-    
+
     # 保存模型
     torch.save(agent.q_network.state_dict(), "lunarlander_dqn.pth")
     
